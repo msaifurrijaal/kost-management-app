@@ -22,12 +22,12 @@ model Role {
 }
 
 model Status {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   name      String
-  code      String   @unique
+  code      String    @unique
   rooms     Room[]
   payments  Payment[]
-  createdAt DateTime @default(now()) @map("created_at")
+  createdAt DateTime  @default(now()) @map("created_at")
 
   @@map("statuses")
 }
@@ -36,18 +36,20 @@ model Province {
   id        String   @id @default(uuid())
   name      String
   cities    City[]
+  users     User[]
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("provinces")
 }
 
 model City {
-  id         String   @id @default(uuid())
+  id         String     @id @default(uuid())
   name       String
-  provinceId String   @map("province_id")
-  province   Province @relation(fields: [provinceId], references: [id])
+  provinceId String     @map("province_id")
+  province   Province   @relation(fields: [provinceId], references: [id])
   properties Property[]
-  createdAt  DateTime @default(now()) @map("created_at")
+  users      User[]
+  createdAt  DateTime   @default(now()) @map("created_at")
 
   @@map("cities")
 }
@@ -57,17 +59,23 @@ model City {
 //////////////////////////////////////////////////////
 
 model User {
-  id        String   @id @default(uuid())
-  fullName  String   @map("full_name")
-  email     String   @unique
-  password  String
-  phone     String?
-  address   String?
-  nik       String?
-  photoUrl  String?  @map("photo_url")
+  id       String  @id @default(uuid())
+  fullName String  @map("full_name")
+  email    String  @unique
+  password String
+  phone    String?
+  address  String?
+  nik      String?
+  photoUrl String? @map("photo_url")
 
   roleId String @map("role_id")
   role   Role   @relation(fields: [roleId], references: [id])
+
+  provinceId String?   @map("province_id")
+  province   Province? @relation(fields: [provinceId], references: [id])
+
+  cityId String? @map("city_id")
+  city   City?   @relation(fields: [cityId], references: [id])
 
   properties Property[] @relation("OwnerProperties")
   rentals    Rental[]   @relation("TenantRentals")
@@ -79,7 +87,7 @@ model User {
 }
 
 model Property {
-  id          String   @id @default(uuid())
+  id          String  @id @default(uuid())
   name        String
   address     String
   description String?
@@ -111,15 +119,15 @@ model PropertyImage {
 }
 
 model Room {
-  id     String @id @default(uuid())
-  name   String
-  price  Int
-  size   String?
+  id    String  @id @default(uuid())
+  name  String
+  price Int
+  size  String?
 
   statusId String @map("status_id")
   status   Status @relation(fields: [statusId], references: [id])
 
-  propertyId String @map("property_id")
+  propertyId String   @map("property_id")
   property   Property @relation(fields: [propertyId], references: [id])
 
   images        RoomImage[]
@@ -133,17 +141,17 @@ model Room {
 }
 
 model RoomImage {
-  id     String @id @default(uuid())
-  url    String
-  roomId String @map("room_id")
-  room   Room   @relation(fields: [roomId], references: [id])
+  id        String   @id @default(uuid())
+  url       String
+  roomId    String   @map("room_id")
+  room      Room     @relation(fields: [roomId], references: [id])
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("room_images")
 }
 
 model Inventory {
-  id          String @id @default(uuid())
+  id          String  @id @default(uuid())
   name        String
   description String?
 
@@ -170,13 +178,13 @@ model RoomInventory {
 }
 
 model Rental {
-  id           String @id @default(uuid())
-  roomId       String @map("room_id")
-  tenantId     String @map("tenant_id")
-  startDate    DateTime @map("start_date")
+  id           String    @id @default(uuid())
+  roomId       String    @map("room_id")
+  tenantId     String    @map("tenant_id")
+  startDate    DateTime  @map("start_date")
   endDate      DateTime? @map("end_date")
-  monthlyPrice Int @map("monthly_price")
-  isActive     Boolean @default(true) @map("is_active")
+  monthlyPrice Int       @map("monthly_price")
+  isActive     Boolean   @default(true) @map("is_active")
 
   room   Room @relation(fields: [roomId], references: [id])
   tenant User @relation("TenantRentals", fields: [tenantId], references: [id])
@@ -189,10 +197,10 @@ model Rental {
 }
 
 model Payment {
-  id       String @id @default(uuid())
-  rentalId String @map("rental_id")
+  id       String    @id @default(uuid())
+  rentalId String    @map("rental_id")
   amount   Int
-  dueDate  DateTime @map("due_date")
+  dueDate  DateTime  @map("due_date")
   paidAt   DateTime? @map("paid_at")
 
   statusId String @map("status_id")
