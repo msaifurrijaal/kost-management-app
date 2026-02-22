@@ -1,0 +1,206 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+//////////////////////////////////////////////////////
+// REFERENCE TABLES
+//////////////////////////////////////////////////////
+
+model Role {
+  id        String   @id @default(uuid())
+  name      String
+  code      String   @unique
+  users     User[]
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("roles")
+}
+
+model Status {
+  id        String   @id @default(uuid())
+  name      String
+  code      String   @unique
+  rooms     Room[]
+  payments  Payment[]
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("statuses")
+}
+
+model Province {
+  id        String   @id @default(uuid())
+  name      String
+  cities    City[]
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("provinces")
+}
+
+model City {
+  id         String   @id @default(uuid())
+  name       String
+  provinceId String   @map("province_id")
+  province   Province @relation(fields: [provinceId], references: [id])
+  properties Property[]
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("cities")
+}
+
+//////////////////////////////////////////////////////
+// MAIN TABLES
+//////////////////////////////////////////////////////
+
+model User {
+  id        String   @id @default(uuid())
+  fullName  String   @map("full_name")
+  email     String   @unique
+  password  String
+  phone     String?
+  address   String?
+  nik       String?
+  photoUrl  String?  @map("photo_url")
+
+  roleId String @map("role_id")
+  role   Role   @relation(fields: [roleId], references: [id])
+
+  properties Property[] @relation("OwnerProperties")
+  rentals    Rental[]   @relation("TenantRentals")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Property {
+  id          String   @id @default(uuid())
+  name        String
+  address     String
+  description String?
+
+  ownerId String @map("owner_id")
+  owner   User   @relation("OwnerProperties", fields: [ownerId], references: [id])
+
+  cityId String @map("city_id")
+  city   City   @relation(fields: [cityId], references: [id])
+
+  rooms       Room[]
+  inventories Inventory[]
+  images      PropertyImage[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("properties")
+}
+
+model PropertyImage {
+  id         String   @id @default(uuid())
+  url        String
+  propertyId String   @map("property_id")
+  property   Property @relation(fields: [propertyId], references: [id])
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("property_images")
+}
+
+model Room {
+  id     String @id @default(uuid())
+  name   String
+  price  Int
+  size   String?
+
+  statusId String @map("status_id")
+  status   Status @relation(fields: [statusId], references: [id])
+
+  propertyId String @map("property_id")
+  property   Property @relation(fields: [propertyId], references: [id])
+
+  images        RoomImage[]
+  roomInventory RoomInventory[]
+  rentals       Rental[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("rooms")
+}
+
+model RoomImage {
+  id     String @id @default(uuid())
+  url    String
+  roomId String @map("room_id")
+  room   Room   @relation(fields: [roomId], references: [id])
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("room_images")
+}
+
+model Inventory {
+  id          String @id @default(uuid())
+  name        String
+  description String?
+
+  propertyId String   @map("property_id")
+  property   Property @relation(fields: [propertyId], references: [id])
+
+  rooms RoomInventory[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("inventories")
+}
+
+model RoomInventory {
+  id          String @id @default(uuid())
+  roomId      String @map("room_id")
+  inventoryId String @map("inventory_id")
+  quantity    Int
+
+  room      Room      @relation(fields: [roomId], references: [id])
+  inventory Inventory @relation(fields: [inventoryId], references: [id])
+
+  @@map("room_inventories")
+}
+
+model Rental {
+  id           String @id @default(uuid())
+  roomId       String @map("room_id")
+  tenantId     String @map("tenant_id")
+  startDate    DateTime @map("start_date")
+  endDate      DateTime? @map("end_date")
+  monthlyPrice Int @map("monthly_price")
+  isActive     Boolean @default(true) @map("is_active")
+
+  room   Room @relation(fields: [roomId], references: [id])
+  tenant User @relation("TenantRentals", fields: [tenantId], references: [id])
+
+  payments Payment[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("rentals")
+}
+
+model Payment {
+  id       String @id @default(uuid())
+  rentalId String @map("rental_id")
+  amount   Int
+  dueDate  DateTime @map("due_date")
+  paidAt   DateTime? @map("paid_at")
+
+  statusId String @map("status_id")
+  status   Status @relation(fields: [statusId], references: [id])
+
+  rental Rental @relation(fields: [rentalId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("payments")
+}
