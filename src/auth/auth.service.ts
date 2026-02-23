@@ -61,7 +61,7 @@ export class AuthService {
 
   async generateTokens(user: UserJwtPayload) {
     const payload = {
-      sub: user.id,
+      sub: user.sub,
       email: user.email,
       role: user.code,
     };
@@ -103,5 +103,39 @@ export class AuthService {
       accessToken,
       refreshToken,
     };
+  }
+
+  async refreshToken(refreshToken: string) {
+    console.log({ refreshToken });
+    try {
+      const payload = await this.jwtService.verifyAsync(refreshToken, {
+        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+      });
+
+      console.log({ payload });
+
+      const user = await this.prisma.user.findUnique({
+        where: { id: payload.sub },
+        include: { role: true },
+      });
+
+      if (!user) {
+        throw new UnauthorizedException('User not found');
+      }
+
+      const newPayload = {
+        sub: user.id,
+        email: user.email,
+        role: user.role.code,
+      };
+
+      const tokens = await this.generateTokens(newPayload);
+
+      return tokens;
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
   }
 }
