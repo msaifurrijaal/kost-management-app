@@ -5,9 +5,10 @@ import {
   Min,
   IsEmail,
   IsUUID,
+  MinLength,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class GetUsersDto {
   @ApiPropertyOptional({
@@ -104,4 +105,15 @@ export class UpdateUserDto {
   @IsOptional()
   @IsUUID()
   provinceId?: string;
+}
+
+export class UpdatePasswordDto {
+  @ApiProperty({ example: 'oldpassword123' })
+  @IsString()
+  oldPassword: string;
+
+  @ApiProperty({ example: 'newpassword123' })
+  @IsString()
+  @MinLength(6)
+  newPassword: string;
 }
