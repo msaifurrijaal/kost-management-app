@@ -73,3 +73,14 @@ export class RegisterDto {
   @IsNotEmpty()
   roleId: string;
 }
+
+export class LoginDto {
+  @ApiProperty({ example: 'example@mail.com' })
+  @IsEmail()
+  email: string;
+
+  @ApiProperty({ example: 'password123' })
+  @IsString()
+  @IsNotEmpty()
+  password: string;
+}
