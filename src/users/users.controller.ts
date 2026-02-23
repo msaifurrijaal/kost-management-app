@@ -35,8 +35,11 @@ export class UsersController {
   }
 
   @Get(':id')
-  async getUserById(@Param() params: GetUserByIdDto) {
-    return this.userService.getUserById(params.id);
+  async getUserById(
+    @Param() params: GetUserByIdDto,
+    @Query('includeDeleted') includeDeleted?: boolean,
+  ) {
+    return this.userService.getUserById(params.id, includeDeleted);
   }
 
   @Patch(':id')

@@ -12,11 +12,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class GetUsersDto {
   @ApiPropertyOptional({
-    description: 'Page number for pagination',
     example: 1,
-    default: 1,
-    minimum: 1,
-    type: Number,
   })
   @IsOptional()
   @Type(() => Number)
@@ -25,11 +21,7 @@ export class GetUsersDto {
   page?: number;
 
   @ApiPropertyOptional({
-    description: 'Number of items per page',
     example: 10,
-    default: 10,
-    minimum: 1,
-    type: Number,
   })
   @IsOptional()
   @Type(() => Number)
@@ -38,31 +30,32 @@ export class GetUsersDto {
   limit?: number;
 
   @ApiPropertyOptional({
-    description: 'Filter users by active rental property ID',
     example: 'uuid-property-id',
-    type: String,
   })
   @IsOptional()
   @IsString()
   propertyId?: string;
 
   @ApiPropertyOptional({
-    description: 'Search by full name or email (case insensitive)',
     example: 'andi',
-    type: String,
   })
   @IsOptional()
   @IsString()
   search?: string;
 
   @ApiPropertyOptional({
-    description: 'Filter users by role ID',
     example: 'uuid-role-id',
-    type: String,
   })
   @IsOptional()
   @IsString()
   roleId?: string;
+
+  @ApiPropertyOptional({
+    example: false,
+  })
+  @IsOptional()
+  @Type(() => Boolean)
+  showDeleted?: boolean;
 }
 
 export class GetUserByIdDto {

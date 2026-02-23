@@ -12,11 +12,22 @@ export class UsersService {
   constructor(private prisma: PrismaService) {}
 
   async getUsers(query: GetUsersDto) {
-    const { page = 1, limit = 10, propertyId, search, roleId } = query;
+    const {
+      page = 1,
+      limit = 10,
+      propertyId,
+      search,
+      roleId,
+      showDeleted,
+    } = query;
 
     const skip = (page - 1) * limit;
 
     const where: any = {};
+
+    if (!showDeleted) {
+      where.deletedAt = null;
+    }
 
     if (search) {
       where.OR = [
@@ -63,9 +74,12 @@ export class UsersService {
     };
   }
 
-  async getUserById(id: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { id },
+  async getUserById(id: string, includeDeleted = false) {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        id,
+        ...(includeDeleted ? {} : { deletedAt: null }),
+      },
       include: {
         role: true,
         city: true,
