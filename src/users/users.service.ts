@@ -63,6 +63,23 @@ export class UsersService {
     };
   }
 
+  async getUserById(id: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      include: {
+        role: true,
+        city: true,
+        province: true,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
+  }
+
   async updateUser(id: string, dto: UpdateUserDto) {
     const user = await this.prisma.user.findUnique({
       where: { id },

@@ -9,7 +9,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { GetUsersDto, UpdatePasswordDto, UpdateUserDto } from './dto/users.dto';
+import {
+  GetUserByIdDto,
+  GetUsersDto,
+  UpdatePasswordDto,
+  UpdateUserDto,
+} from './dto/users.dto';
 import { JwtAuthGuard } from 'src/auth/guard/jwt.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
 
@@ -27,6 +32,11 @@ export class UsersController {
   @Patch('change-password')
   async changePassword(@Req() req, @Body() dto: UpdatePasswordDto) {
     return this.userService.updatePassword(req.user.sub, dto);
+  }
+
+  @Get(':id')
+  async getUserById(@Param() params: GetUserByIdDto) {
+    return this.userService.getUserById(params.id);
   }
 
   @Patch(':id')

@@ -65,6 +65,14 @@ export class GetUsersDto {
   roleId?: string;
 }
 
+export class GetUserByIdDto {
+  @ApiProperty({
+    example: 'uuid-user-id',
+  })
+  @IsUUID()
+  id: string;
+}
+
 export class UpdateUserDto {
   @ApiPropertyOptional({ example: 'John Doe' })
   @IsOptional()
