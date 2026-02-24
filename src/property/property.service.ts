@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreatePropertyDto } from './dto/property.dto';
+import { CreatePropertyDto, UpdatePropertyDto } from './dto/property.dto';
 
 @Injectable()
 export class PropertyService {
@@ -17,6 +17,8 @@ export class PropertyService {
     });
     if (!owner) throw new NotFoundException('Owner not found');
 
+    console.log({ dto });
+
     const property = await this.prisma.property.create({
       data: {
         name: dto.name,
@@ -24,13 +26,48 @@ export class PropertyService {
         description: dto.description,
         cityId: dto.cityId,
         ownerId: dto.ownerId,
+        images: dto.images?.create
+          ? { create: dto.images.create.map((url) => ({ url })) }
+          : undefined,
       },
-      include: {
-        city: true,
-        owner: true,
-      },
+      include: { city: true, owner: true, images: true },
     });
 
     return property;
+  }
+
+  async updateProperty(id: string, dto: UpdatePropertyDto) {
+    const property = await this.prisma.property.findUnique({ where: { id } });
+    if (!property) throw new NotFoundException('Property not found');
+
+    const data: any = { ...dto };
+
+    // Nested images operations
+    if (dto.images) {
+      data.images = {};
+
+      if (dto.images.create?.length) {
+        data.images.create = dto.images.create.map((url) => ({ url }));
+      }
+
+      if (dto.images.update?.length) {
+        data.images.update = dto.images.update.map((img) => ({
+          where: { id: img.id },
+          data: { url: img.url },
+        }));
+      }
+
+      if (dto.images.delete?.length) {
+        data.images.deleteMany = dto.images.delete.map((id) => ({ id }));
+      }
+    }
+
+    const updated = await this.prisma.property.update({
+      where: { id },
+      data,
+      include: { city: true, owner: true, images: true },
+    });
+
+    return updated;
   }
 }
