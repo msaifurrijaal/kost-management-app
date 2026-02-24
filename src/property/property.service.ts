@@ -1,6 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreatePropertyDto, UpdatePropertyDto } from './dto/property.dto';
+import {
+  CreatePropertyDto,
+  GetPropertiesDto,
+  UpdatePropertyDto,
+} from './dto/property.dto';
 
 @Injectable()
 export class PropertyService {
@@ -69,5 +73,62 @@ export class PropertyService {
     });
 
     return updated;
+  }
+
+  async getProperties(query: GetPropertiesDto) {
+    const {
+      cityId,
+      ownerId,
+      limit = 10,
+      page = 1,
+      search,
+      showDeleted,
+      sortBy = 'updatedAt',
+      sortOrder = 'desc',
+    } = query;
+
+    const skip = (page - 1) * limit;
+
+    const where: any = {};
+
+    if (!showDeleted) {
+      where.deletedAt = null;
+    }
+
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { address: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    if (cityId) {
+      where.cityId = cityId;
+    }
+
+    if (ownerId) {
+      where.ownerId = ownerId;
+    }
+
+    const [data, total] = await Promise.all([
+      this.prisma.property.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { [sortBy]: sortOrder },
+        include: { city: true, owner: true, images: true },
+      }),
+      this.prisma.property.count({ where }),
+    ]);
+
+    return {
+      data,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 }

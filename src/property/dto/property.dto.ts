@@ -6,6 +6,8 @@ import {
   ValidateNested,
   IsArray,
   ArrayNotEmpty,
+  IsInt,
+  Min,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -117,4 +119,66 @@ export class UpdatePropertyDto {
   @ValidateNested()
   @Type(() => ImageUpdateDto)
   images?: ImageUpdateDto;
+}
+
+export class GetPropertiesDto {
+  @ApiPropertyOptional({
+    example: 1,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page?: number;
+
+  @ApiPropertyOptional({
+    example: 10,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  limit?: number;
+
+  @ApiPropertyOptional({
+    example: 'uuid-user-id',
+  })
+  @IsOptional()
+  @IsString()
+  ownerId?: string;
+
+  @ApiPropertyOptional({
+    example: 'Kost Menteng',
+  })
+  @IsOptional()
+  @IsString()
+  search?: string;
+
+  @ApiPropertyOptional({
+    example: 'uuid-city-id',
+  })
+  @IsOptional()
+  @IsString()
+  cityId?: string;
+
+  @ApiPropertyOptional({
+    example: false,
+  })
+  @IsOptional()
+  @Type(() => Boolean)
+  showDeleted?: boolean;
+
+  @ApiPropertyOptional({
+    example: 'updatedAt',
+  })
+  @IsOptional()
+  @IsString()
+  sortBy?: string;
+
+  @ApiPropertyOptional({
+    example: 'desc',
+  })
+  @IsOptional()
+  @IsString()
+  sortOrder?: string;
 }
