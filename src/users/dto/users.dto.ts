@@ -6,8 +6,9 @@ import {
   IsEmail,
   IsUUID,
   MinLength,
+  IsBoolean,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class GetUsersDto {
@@ -54,7 +55,12 @@ export class GetUsersDto {
     example: false,
   })
   @IsOptional()
-  @Type(() => Boolean)
+  @Transform(({ value }) => {
+    if (value === 'true' || value === '1') return true;
+    if (value === 'false' || value === '0') return false;
+    return value;
+  })
+  @IsBoolean()
   showDeleted?: boolean;
 }
 

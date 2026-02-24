@@ -131,4 +131,22 @@ export class PropertyService {
       },
     };
   }
+
+  async getPropertyById(id: string, showDeleted: boolean = false) {
+    const property = await this.prisma.property.findFirst({
+      where: { id, ...(showDeleted ? {} : { deletedAt: null }) },
+      include: { city: true, owner: true, images: true },
+    });
+
+    if (!property) throw new NotFoundException('Property not found');
+
+    return property;
+  }
+
+  async deleteProperty(id: string) {
+    await this.prisma.property.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
+  }
 }

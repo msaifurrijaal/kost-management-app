@@ -8,8 +8,9 @@ import {
   ArrayNotEmpty,
   IsInt,
   Min,
+  IsBoolean,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 
 class ImageItemUpdateDto {
   @ApiProperty({ example: 'uuid-image-id' })
@@ -165,7 +166,12 @@ export class GetPropertiesDto {
     example: false,
   })
   @IsOptional()
-  @Type(() => Boolean)
+  @Transform(({ value }) => {
+    if (value === 'true' || value === '1') return true;
+    if (value === 'false' || value === '0') return false;
+    return value;
+  })
+  @IsBoolean()
   showDeleted?: boolean;
 
   @ApiPropertyOptional({
@@ -181,4 +187,17 @@ export class GetPropertiesDto {
   @IsOptional()
   @IsString()
   sortOrder?: string;
+}
+
+export class GetPropertyByIdParamsDto {
+  @ApiProperty({ example: 'uuid-property-id' })
+  @IsUUID()
+  id: string;
+}
+
+export class GetPropertyByIdQueryDto {
+  @ApiPropertyOptional({ example: false })
+  @IsOptional()
+  @Type(() => Boolean)
+  showDeleted?: boolean;
 }

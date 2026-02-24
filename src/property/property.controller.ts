@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
   Param,
   Patch,
   Post,
@@ -16,6 +18,8 @@ import { Roles } from 'src/decorators/roles.decorator';
 import {
   CreatePropertyDto,
   GetPropertiesDto,
+  GetPropertyByIdParamsDto,
+  GetPropertyByIdQueryDto,
   UpdatePropertyDto,
 } from './dto/property.dto';
 
@@ -36,9 +40,26 @@ export class PropertyController {
     return this.propertyService.createProperty(dto);
   }
 
+  @Get(':id')
+  async getPropertyById(
+    @Param() params: GetPropertyByIdParamsDto,
+    @Query() query?: GetPropertyByIdQueryDto,
+  ) {
+    return this.propertyService.getPropertyById(
+      params.id,
+      query?.showDeleted || false,
+    );
+  }
+
   @Patch(':id')
   @Roles('OWNER', 'ADMIN')
   async update(@Param('id') id: string, @Body() dto: UpdatePropertyDto) {
     return this.propertyService.updateProperty(id, dto);
+  }
+
+  @Delete(':id')
+  @HttpCode(204)
+  async delete(@Param('id') id: string) {
+    await this.propertyService.deleteProperty(id);
   }
 }
