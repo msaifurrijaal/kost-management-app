@@ -21,8 +21,6 @@ export class PropertyService {
     });
     if (!owner) throw new NotFoundException('Owner not found');
 
-    console.log({ dto });
-
     const property = await this.prisma.property.create({
       data: {
         name: dto.name,
