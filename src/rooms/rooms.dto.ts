@@ -13,6 +13,47 @@ import {
   ValidateNested,
 } from 'class-validator';
 
+class ImageItemUpdateDto {
+  @ApiProperty({ example: 'uuid-image-id' })
+  @IsUUID()
+  id: string;
+
+  @ApiProperty({ example: 'https://example.com/image1.jpg' })
+  @IsString()
+  url: string;
+}
+
+class ImageUpdateDto {
+  @ApiPropertyOptional({
+    example: ['https://example.com/image1.jpg'],
+    type: [String],
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsString({ each: true })
+  create?: string[];
+
+  @ApiPropertyOptional({
+    type: [ImageItemUpdateDto],
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ImageItemUpdateDto)
+  update?: ImageItemUpdateDto[];
+
+  @ApiPropertyOptional({
+    example: ['uuid-image-to-delete'],
+    type: [String],
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsUUID('all', { each: true })
+  delete?: string[];
+}
+
 export class ImageCreateDto {
   @ApiPropertyOptional({
     example: ['https://example.com/image1.jpg'],
@@ -56,6 +97,42 @@ export class CreateRoomDto {
   @ValidateNested()
   @Type(() => ImageCreateDto)
   images?: ImageCreateDto;
+}
+
+export class UpdateRoomDto {
+  @ApiPropertyOptional({ example: 'Kamar 1' })
+  @IsOptional()
+  @IsString()
+  name: string;
+
+  @ApiPropertyOptional({ example: 500000 })
+  @IsOptional()
+  @IsNumber()
+  @Transform(({ value }) => parseFloat(value))
+  price: number;
+
+  @ApiPropertyOptional({ example: 3 })
+  @IsOptional()
+  @IsNumber()
+  @Transform(({ value }) => (value !== undefined ? parseFloat(value) : value))
+  width?: number;
+
+  @ApiPropertyOptional({ example: 3 })
+  @IsOptional()
+  @IsNumber()
+  @Transform(({ value }) => (value !== undefined ? parseFloat(value) : value))
+  length?: number;
+
+  @ApiPropertyOptional({ example: 'uuid-property-id' })
+  @IsOptional()
+  @IsUUID()
+  propertyId: string;
+
+  @ApiPropertyOptional({ type: ImageUpdateDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ImageUpdateDto)
+  images?: ImageUpdateDto;
 }
 
 export class GetRoomsDto {
