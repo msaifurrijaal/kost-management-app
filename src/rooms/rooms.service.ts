@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateRoomDto, GetRoomsDto, UpdateRoomDto } from './rooms.dto';
-import { handleErrorPrismaNotFoundFK } from 'src/utils/errorHandler.util';
+import { handleErrorPrisma } from 'src/utils/errorHandler.util';
 
 @Injectable()
 export class RoomsService {
@@ -33,7 +33,7 @@ export class RoomsService {
       return room;
     } catch (error: any) {
       console.log(`❌ Error creating room: ${error}`);
-      handleErrorPrismaNotFoundFK(error);
+      handleErrorPrisma(error);
     }
   }
 
@@ -135,5 +135,16 @@ export class RoomsService {
     if (!room) throw new NotFoundException('Room not found');
 
     return room;
+  }
+
+  async deleteRoom(id: string) {
+    try {
+      await this.prisma.room.update({
+        where: { id },
+        data: { deletedAt: new Date() },
+      });
+    } catch (error: any) {
+      handleErrorPrisma(error);
+    }
   }
 }

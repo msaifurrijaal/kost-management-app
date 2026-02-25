@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
   Param,
   Patch,
   Post,
@@ -44,5 +46,12 @@ export class RoomsController {
     @Query('showDeleted') showDeleted: boolean = false,
   ) {
     return this.roomsService.getRoomById(id, showDeleted);
+  }
+
+  @Delete(':id')
+  @Roles('OWNER', 'ADMIN')
+  @HttpCode(204)
+  async delete(@Param('id') id: string) {
+    return this.roomsService.deleteRoom(id);
   }
 }
