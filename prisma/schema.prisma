@@ -123,7 +123,7 @@ model PropertyImage {
 model Room {
   id    String  @id @default(uuid())
   name  String
-  price Int
+  price Decimal @db.Decimal(10,2)
   size  String?
 
   statusId String @map("status_id")
