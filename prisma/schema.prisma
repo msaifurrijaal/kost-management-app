@@ -121,10 +121,11 @@ model PropertyImage {
 }
 
 model Room {
-  id    String  @id @default(uuid())
-  name  String
-  price Decimal @db.Decimal(10,2)
-  size  String?
+  id     String   @id @default(uuid())
+  name   String
+  price  Decimal  @db.Decimal(10, 2)
+  width  Decimal? @db.Decimal(10, 2)
+  length Decimal? @db.Decimal(10, 2)
 
   statusId String @map("status_id")
   status   Status @relation(fields: [statusId], references: [id])
