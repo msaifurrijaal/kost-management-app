@@ -125,4 +125,15 @@ export class RoomsService {
       },
     };
   }
+
+  async getRoomById(id: string, showDeleted: boolean = false) {
+    const room = await this.prisma.room.findFirst({
+      where: { id, ...(showDeleted ? {} : { deletedAt: null }) },
+      include: { property: true, status: true, images: true },
+    });
+
+    if (!room) throw new NotFoundException('Room not found');
+
+    return room;
+  }
 }

@@ -37,4 +37,12 @@ export class RoomsController {
   async update(@Param('id') id: string, @Body() dto: UpdateRoomDto) {
     return this.roomsService.updateRoom(id, dto);
   }
+
+  @Get(':id')
+  async getRoomById(
+    @Param('id') id: string,
+    @Query('showDeleted') showDeleted: boolean = false,
+  ) {
+    return this.roomsService.getRoomById(id, showDeleted);
+  }
 }
