@@ -32,44 +32,44 @@ export class RoomsService {
 
       return room;
     } catch (error: any) {
-      console.log(`❌ Error creating room: ${error}`);
       handleErrorPrisma(error);
     }
   }
 
   async updateRoom(id: string, dto: UpdateRoomDto) {
-    const room = await this.prisma.room.findUnique({ where: { id } });
-    if (!room) throw new NotFoundException('Room not found');
+    try {
+      const data: any = { ...dto };
 
-    const data: any = { ...dto };
+      // Nested images operations
+      if (dto.images) {
+        data.images = {};
 
-    // Nested images operations
-    if (dto.images) {
-      data.images = {};
+        if (dto.images.create?.length) {
+          data.images.create = dto.images.create.map((url) => ({ url }));
+        }
 
-      if (dto.images.create?.length) {
-        data.images.create = dto.images.create.map((url) => ({ url }));
+        if (dto.images.update?.length) {
+          data.images.update = dto.images.update.map((img) => ({
+            where: { id: img.id },
+            data: { url: img.url },
+          }));
+        }
+
+        if (dto.images.delete?.length) {
+          data.images.deleteMany = dto.images.delete.map((id) => ({ id }));
+        }
       }
 
-      if (dto.images.update?.length) {
-        data.images.update = dto.images.update.map((img) => ({
-          where: { id: img.id },
-          data: { url: img.url },
-        }));
-      }
+      const updated = await this.prisma.room.update({
+        where: { id },
+        data,
+        include: { property: true, status: true, images: true },
+      });
 
-      if (dto.images.delete?.length) {
-        data.images.deleteMany = dto.images.delete.map((id) => ({ id }));
-      }
+      return updated;
+    } catch (error: any) {
+      handleErrorPrisma(error);
     }
-
-    const updated = await this.prisma.room.update({
-      where: { id },
-      data,
-      include: { property: true, status: true, images: true },
-    });
-
-    return updated;
   }
 
   async getRooms(dto: GetRoomsDto) {
