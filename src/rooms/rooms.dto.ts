@@ -1,6 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
+  ArrayNotEmpty,
+  IsArray,
   IsBoolean,
   IsInt,
   IsNumber,
@@ -8,7 +10,20 @@ import {
   IsString,
   IsUUID,
   Min,
+  ValidateNested,
 } from 'class-validator';
+
+export class ImageCreateDto {
+  @ApiPropertyOptional({
+    example: ['https://example.com/image1.jpg'],
+    type: [String],
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsString({ each: true })
+  create?: string[];
+}
 
 export class CreateRoomDto {
   @ApiProperty({ example: 'Kamar 1' })
@@ -35,6 +50,12 @@ export class CreateRoomDto {
   @ApiProperty({ example: 'uuid-property-id' })
   @IsUUID()
   propertyId: string;
+
+  @ApiPropertyOptional({ type: ImageCreateDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ImageCreateDto)
+  images?: ImageCreateDto;
 }
 
 export class GetRoomsDto {

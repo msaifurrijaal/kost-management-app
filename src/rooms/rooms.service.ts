@@ -23,8 +23,11 @@ export class RoomsService {
         data: {
           ...dto,
           statusId: firstStatus.id,
+          images: dto.images?.create
+            ? { create: dto.images.create.map((url) => ({ url })) }
+            : undefined,
         },
-        include: { property: true, status: true },
+        include: { property: true, status: true, images: true },
       });
 
       return room;
